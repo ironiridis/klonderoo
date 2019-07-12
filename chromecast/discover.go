@@ -9,27 +9,6 @@ import (
 	"github.com/ironiridis/klonderoo/mdns"
 )
 
-/*
-func ListenAndLog() {
-	a, err := net.ResolveUDPAddr("udp4", "224.0.0.251:5353")
-	errassert.Verbose("resolve UDP address", err)
-	l, err := net.ListenMulticastUDP("udp", nil, a)
-	errassert.Verbose("listening for multicast", err)
-	l.SetReadBuffer(9200) // largest jumbo frame packet
-
-	buf := make([]byte, 9200)
-	for {
-		count, src, err := l.ReadFromUDP(buf)
-		if err != nil {
-			fmt.Printf("udp read: %v\n", err)
-			continue
-		}
-
-		fmt.Printf("from %s (%d bytes): %02x\n", src, count, buf[:count])
-	}
-}
-*/
-
 // A Discoverer provides a channel which clients should range on for updates.
 type Discoverer struct {
 	mu            sync.RWMutex
