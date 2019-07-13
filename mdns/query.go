@@ -17,7 +17,6 @@ type Result struct {
 
 type queryRoutine struct {
 	host     string
-	unicast  bool
 	qtype    [2]byte
 	addr     *net.UDPAddr
 	conn     *net.UDPConn
@@ -44,13 +43,8 @@ func (q *queryRoutine) send() (int, error) {
 	}
 	b.WriteByte(0x00) // end of labels
 
-	b.Write(q.qtype[:]) // query type: ptr, a, aaaa, etc
-	if q.unicast {
-		b.WriteByte(0x80) // unicast reply preferred flag
-	} else {
-		b.WriteByte(0x00) // multicast reply is ok
-	}
-	b.WriteByte(0x01) // question class: internet
+	b.Write(q.qtype[:])         // query type: ptr, a, aaaa, etc
+	b.Write([]byte{0x00, 0x01}) // question class: internet
 
 	return q.conn.WriteToUDP(b.Bytes(), q.addr)
 }
@@ -99,53 +93,33 @@ func (q *queryRoutine) start(d time.Duration) {
 }
 
 // QueryA requests, via mDNS, the IPv4 address of host
-func QueryA(host string, unicast bool, timeout time.Duration) <-chan *Result {
+func QueryA(host string, timeout time.Duration) <-chan *Result {
 	r := make(chan *Result)
-	x := &queryRoutine{
-		host:    host,
-		unicast: unicast,
-		qtype:   [2]byte{0x00, 0x01},
-		r:       r,
-	}
+	x := &queryRoutine{host: host, qtype: [2]byte{0x00, 0x01}, r: r}
 	go x.start(timeout)
 	return r
 }
 
 // QueryAAAA requests, via mDNS, the IPv6 address of host
-func QueryAAAA(host string, unicast bool, timeout time.Duration) <-chan *Result {
+func QueryAAAA(host string, timeout time.Duration) <-chan *Result {
 	r := make(chan *Result)
-	x := &queryRoutine{
-		host:    host,
-		unicast: unicast,
-		qtype:   [2]byte{0x00, 0x1C},
-		r:       r,
-	}
+	x := &queryRoutine{host: host, qtype: [2]byte{0x00, 0x1C}, r: r}
 	go x.start(timeout)
 	return r
 }
 
 // QueryPTR requests, via mDNS, pointer records for host
-func QueryPTR(host string, unicast bool, timeout time.Duration) <-chan *Result {
+func QueryPTR(host string, timeout time.Duration) <-chan *Result {
 	r := make(chan *Result)
-	x := &queryRoutine{
-		host:    host,
-		unicast: unicast,
-		qtype:   [2]byte{0x00, 0x0C},
-		r:       r,
-	}
+	x := &queryRoutine{host: host, qtype: [2]byte{0x00, 0x0C}, r: r}
 	go x.start(timeout)
 	return r
 }
 
 // QueryTXT requests, via mDNS, text records for host
-func QueryTXT(host string, unicast bool, timeout time.Duration) <-chan *Result {
+func QueryTXT(host string, timeout time.Duration) <-chan *Result {
 	r := make(chan *Result)
-	x := &queryRoutine{
-		host:    host,
-		unicast: unicast,
-		qtype:   [2]byte{0x00, 0x10},
-		r:       r,
-	}
+	x := &queryRoutine{host: host, qtype: [2]byte{0x00, 0x10}, r: r}
 	go x.start(timeout)
 	return r
 }
