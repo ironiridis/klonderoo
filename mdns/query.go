@@ -14,12 +14,13 @@ type Client struct {
 	addr    *net.UDPAddr
 	conn    *net.UDPConn
 	timeout time.Duration
+	maxrecs int
 	r       chan<- *Result
 }
 
 func (c *Client) readPacket(buf []byte) {
 	b := bytes.NewReader(buf)
-	r := &Result{}
+	r := &Result{maxrecs: c.maxrecs}
 	err := r.ReadFrom(b)
 	if err != nil {
 		return
@@ -47,7 +48,7 @@ func (c *Client) start() (err error) {
 	go func() {
 		defer close(c.r)
 		defer c.conn.Close()
-		buf := make([]byte, 9000)
+		buf := make([]byte, mDNSMaximumPacketSize)
 		for {
 			n, err := c.conn.Read(buf)
 			if err != nil {
@@ -65,13 +66,19 @@ func NewClient(host string, t RecordType) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &Client{q: q, timeout: 5 * time.Second}
+	c := &Client{q: q, timeout: 5 * time.Second, maxrecs: 1000}
 	return c, nil
 }
 
 // SetTimeout changes the timeout to a value other than the default of 5 seconds
 func (c *Client) SetTimeout(t time.Duration) {
 	c.timeout = t
+}
+
+// SetMaximumRecords changes the maximum record count to a value other than the
+// default of 1000
+func (c *Client) SetMaximumRecords(n int) {
+	c.maxrecs = n
 }
 
 // Run will write the request to the network, and start the thread that awaits

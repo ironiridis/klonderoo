@@ -21,4 +21,5 @@ const (
 	ResponseCodeRefused          = Error("server response code indicated Refused")
 	ResponseCodeOtherFailure     = Error("server response code indicated failure")
 	ResponseQuestionCountNonzero = Error("server response contains nonzero question count")
+	ResponseTooLarge             = Error("decoded header advertised more records than permitted")
 )

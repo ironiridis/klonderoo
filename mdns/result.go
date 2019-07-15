@@ -6,6 +6,7 @@ type Result struct {
 	Flags         uint16 // Success is 0x8000 (usually)
 	Answer        []Record
 	Additional    []Record
+	maxrecs       int
 }
 
 func (d *Result) validateFlags() error {
@@ -68,6 +69,11 @@ func (d *Result) ReadFrom(r mDNSReader) (err error) {
 	}
 	arcount, err := readUint16(r)
 	if err != nil {
+		return
+	}
+
+	if int(ancount+nscount+arcount) > d.maxrecs {
+		err = ResponseTooLarge
 		return
 	}
 
