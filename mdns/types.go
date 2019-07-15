@@ -1,14 +1,11 @@
 package mdns
 
+import "fmt"
+
 // Result is a response to a Query.
 type Result struct {
-	QueryHost  string
 	Answer     []Record
 	Additional []Record
-}
-
-// Record is an individual piece of information such as an IP address.
-type Record struct {
 }
 
 // QueryType represents the different kinds of record types that can be
@@ -38,4 +35,24 @@ func (t QueryType) canDecodeRecord() bool {
 		return true
 	}
 	return false
+}
+
+func (t QueryType) String() string {
+	switch t {
+	case RecordTypeA:
+		return "A"
+	case RecordTypeCNAME:
+		return "CNAME"
+	case RecordTypePTR:
+		return "PTR"
+	case RecordTypeTXT:
+		return "TXT"
+	case RecordTypeAAAA:
+		return "AAAA"
+	case RecordTypeSRV:
+		return "SRV"
+	case RecordTypeAny:
+		return "Any"
+	}
+	return fmt.Sprintf("[%04x]", uint16(t))
 }

@@ -10,4 +10,6 @@ const (
 	IllegalHostnameLabelTooLong  = Error("hostname contains an illegal label component that is more than 63 bytes")
 	IllegalHostnameLabelEmpty    = Error("hostname contains an illegal label component that is empty")
 	LabelCompressionNotSupported = Error("label compression is not supported")
+	ClassNotInternet             = Error("decoding packet with class not matching IN")
+	CannotDecodeRecordType       = Error("unable to decode this record type")
 )

@@ -72,7 +72,7 @@ func TestSubjectWireRoundTrip(t *testing.T) {
 		}
 
 		w := bytes.Buffer{}
-		n, e := a.WriteTo(&w)
+		e = a.WriteTo(&w)
 		if e != try.err2 {
 			t.Errorf("Subject.FromString(%q).WriteTo(w) should have returned %+v, but returned %+v", try.str, try.err2, e)
 			continue
@@ -80,26 +80,14 @@ func TestSubjectWireRoundTrip(t *testing.T) {
 		if e != nil {
 			continue
 		}
-		if n == 0 {
-			t.Errorf("Subject.FromString(%q).WriteTo(w) indicated it wrote zero bytes but err was nil", try.str)
-			continue
-		}
-		if int(n) != w.Len() {
-			t.Errorf("Subject.FromString(%q).WriteTo(w) indicated it wrote %d byte(s) but w.Len() returns %d", try.str, n, w.Len())
-			continue
-		}
 
 		b := &mdns.Subject{}
-		n, e = b.ReadFrom(&w)
+		e = b.ReadFrom(&w)
 		if e != try.err3 {
 			t.Errorf("Subject.ReadFrom(w) should have returned %+v, but returned %+v", try.err3, e)
 			continue
 		}
 		if e != nil {
-			continue
-		}
-		if n == 0 {
-			t.Errorf("Subject.ReadFrom(w) indicated it read zero bytes but err was nil")
 			continue
 		}
 
