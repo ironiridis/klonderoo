@@ -14,7 +14,7 @@ type Question struct {
 	QueryClass    uint16
 }
 
-// WriteTo encodes the Question and then writes it to w
+// WriteTo encodes Question and then writes it to w
 func (q *Question) WriteTo(w io.Writer) (int64, error) {
 	n, err := w.Write(q.Encode())
 	return int64(n), err
@@ -31,13 +31,12 @@ func (q *Question) Encode() []byte {
 	b.Write(uint16ToWire(0)) // additional record count
 	q.Subject.WriteTo(&b)
 	b.Write(q.QueryType.Encode())
+	b.Write(uint16ToWire(q.QueryClass))
 
 	return b.Bytes()
 }
 
-func (q *Question) Decode(buf []byte) {
-}
-
+// NewQuestion takes a subject and a query type and returns an initialized Question
 func NewQuestion(subject string, t QueryType) (*Question, error) {
 	q := &Question{Subject: &Subject{}, QueryType: t, QueryClass: 0x0001}
 	err := q.Subject.FromString(subject)

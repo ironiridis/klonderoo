@@ -1,5 +1,16 @@
 package mdns
 
+// Result is a response to a Query.
+type Result struct {
+	QueryHost  string
+	Answer     []Record
+	Additional []Record
+}
+
+// Record is an individual piece of information such as an IP address.
+type Record struct {
+}
+
 // QueryType represents the different kinds of record types that can be
 // requested and returned via mDNS.
 type QueryType uint16

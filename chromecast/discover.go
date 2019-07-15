@@ -78,7 +78,15 @@ func (d *Discoverer) Get(id DeviceID) (*KnownDevice, error) {
 }
 
 func (d *Discoverer) mdnsQuery() {
-	for r := range mdns.QueryPTR("_googlecast._tcp.local.", false, 5*time.Second) {
+	c, err := mdns.NewClient("_googlecast._tcp.local.", mdns.RecordTypePTR)
+	if err != nil {
+		return
+	}
+	ch, err := c.Run()
+	if err != nil {
+		return
+	}
+	for r := range ch {
 		fmt.Printf("lol %+v\n", r)
 	}
 }
