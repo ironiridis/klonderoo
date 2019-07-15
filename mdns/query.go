@@ -2,10 +2,11 @@ package mdns
 
 import (
 	"bytes"
-	"fmt"
 	"net"
 	"time"
 )
+
+const mDNSMaximumPacketSize = 9000 // rfc6762 section 17
 
 // Client is the main data type of the package.
 type Client struct {
@@ -17,33 +18,12 @@ type Client struct {
 }
 
 func (c *Client) readPacket(buf []byte) {
-	fmt.Printf("%q\n", buf)
-	b := bytes.NewBuffer(buf)
+	b := bytes.NewReader(buf)
 	r := &Result{}
-	if b.Len() < 12 { // not enough bytes for a complete header
+	err := r.ReadFrom(b)
+	if err != nil {
 		return
 	}
-	hdr := b.Next(12)
-	if hdr[2]&0x80 == 0 { // header indicates a query, not a response
-		return
-	}
-	if hdr[2]&0x70 != 0 { // opcode is not "query"
-		return
-	}
-	if hdr[3]&0x0f != 0 { // response code is not "no error"
-		return
-	}
-
-	// store record counts
-	// parse question section
-	// validate that question response equals our original query
-	// parse answer section
-	// store answer records
-	// parse authority section
-	// ignore?
-	// parse additional record section
-	// store additional records
-
 	c.r <- r
 }
 
@@ -58,7 +38,7 @@ func (c *Client) start() (err error) {
 		return
 	}
 	c.conn.SetDeadline(time.Now().Add(c.timeout))
-	c.conn.SetReadBuffer(9000) // rfc6762 sec 17 maximum size
+	c.conn.SetReadBuffer(mDNSMaximumPacketSize)
 	_, err = c.conn.WriteToUDP(c.q.Encode(), c.addr)
 	if err != nil {
 		c.conn.Close()
@@ -80,7 +60,7 @@ func (c *Client) start() (err error) {
 }
 
 // NewClient requests, via mDNS, records for host of type t within timeout
-func NewClient(host string, t QueryType) (*Client, error) {
+func NewClient(host string, t RecordType) (*Client, error) {
 	q, err := NewQuestion(host, t)
 	if err != nil {
 		return nil, err

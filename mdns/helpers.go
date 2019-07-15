@@ -6,6 +6,7 @@ import "io"
 // implement io.ReaderFrom and io.WriterTo. we aren't (... anymore)
 type mDNSReader interface {
 	io.Reader
+	io.ReaderAt
 }
 type mDNSWriter interface {
 	io.Writer

@@ -81,8 +81,9 @@ func TestSubjectWireRoundTrip(t *testing.T) {
 			continue
 		}
 
+		r := bytes.NewReader(w.Bytes())
 		b := &mdns.Subject{}
-		e = b.ReadFrom(&w)
+		e = b.ReadFrom(r)
 		if e != try.err3 {
 			t.Errorf("Subject.ReadFrom(w) should have returned %+v, but returned %+v", try.err3, e)
 			continue

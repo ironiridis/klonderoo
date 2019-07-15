@@ -10,7 +10,7 @@ type Question struct {
 	TransactionID uint16 // Always zero; mDNS responders don't seem to honor it
 	Flags         uint16 // Always zero; no relevant flags wrt mDNS queries
 	Subject       *Subject
-	QueryType     QueryType // A, AAAA, PTR, TXT, SRV, etc
+	QueryType     RecordType // A, AAAA, PTR, TXT, SRV, etc
 	QueryClass    uint16
 }
 
@@ -37,7 +37,7 @@ func (q *Question) Encode() []byte {
 }
 
 // NewQuestion takes a subject and a query type and returns an initialized Question
-func NewQuestion(subject string, t QueryType) (*Question, error) {
+func NewQuestion(subject string, t RecordType) (*Question, error) {
 	q := &Question{Subject: &Subject{}, QueryType: t, QueryClass: 0x0001}
 	err := q.Subject.FromString(subject)
 	if err != nil {
