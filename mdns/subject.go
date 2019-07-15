@@ -54,7 +54,7 @@ func (s *Subject) ReadFrom(r mDNSReader) (err error) {
 		if l[0] == 0 {
 			break
 		}
-		_, err = r.Read(b[:l[0]])
+		n, err = r.Read(b[:l[0]])
 		if err != nil {
 			s.s = nil
 			return
