@@ -13,7 +13,7 @@ type Subject struct {
 }
 
 // WriteTo will encode Subject and Write it to w
-func (s *Subject) WriteTo(w mDNSWriter) error {
+func (s *Subject) WriteTo(w mDNSPacketWriter) error {
 	_, err := w.Write(s.s)
 	return err
 }
@@ -23,7 +23,7 @@ func (s *Subject) Encode() []byte {
 	return s.s
 }
 
-func (s *Subject) labelRead(r mDNSReader) (int64, error) {
+func (s *Subject) labelRead(r mDNSPacketReader) (int64, error) {
 	l := make([]byte, 1)
 	b := make([]byte, 255)
 	var n int
@@ -67,7 +67,7 @@ func (s *Subject) labelRead(r mDNSReader) (int64, error) {
 }
 
 // ReadFrom will decode a Subject by reading it from r
-func (s *Subject) ReadFrom(r mDNSReader) error {
+func (s *Subject) ReadFrom(r mDNSPacketReader) error {
 	if s.s == nil {
 		s.s = make([]byte, 0, 255)
 	} else {

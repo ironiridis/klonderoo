@@ -22,4 +22,6 @@ const (
 	ResponseCodeOtherFailure     = Error("server response code indicated failure")
 	ResponseQuestionCountNonzero = Error("server response contains nonzero question count")
 	ResponseTooLarge             = Error("decoded header advertised more records than permitted")
+	RecordParseTypeUnsupported   = Error("cannot parse record due to unsupported type")
+	RecordParseLengthUnexpected  = Error("record type has a canonical length but packet disagrees")
 )

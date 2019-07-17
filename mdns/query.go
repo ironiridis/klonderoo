@@ -21,7 +21,7 @@ type Client struct {
 func (c *Client) readPacket(buf []byte) {
 	b := bytes.NewReader(buf)
 	r := &Result{maxrecs: c.maxrecs}
-	err := r.ReadFrom(b)
+	err := r.readFrom(b)
 	if err != nil {
 		return
 	}

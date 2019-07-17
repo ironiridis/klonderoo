@@ -30,7 +30,7 @@ func (q *Question) Encode() []byte {
 	b.Write(uint16ToWire(0)) // authority record count
 	b.Write(uint16ToWire(0)) // additional record count
 	q.Subject.WriteTo(&b)
-	b.Write(q.Type.Encode())
+	b.Write(q.Type.encode())
 	b.Write(uint16ToWire(q.Class))
 
 	return b.Bytes()

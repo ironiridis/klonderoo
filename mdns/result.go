@@ -2,24 +2,24 @@ package mdns
 
 // Result is a response to a Query.
 type Result struct {
-	TransactionID uint16 // Always zero; mDNS responders don't seem to honor it
-	Flags         uint16 // Success is 0x8000 (usually)
+	transactionID uint16 // Always zero; mDNS responders don't seem to honor it
+	flags         uint16 // Success is 0x8000 (usually)
 	Answer        []Record
 	Additional    []Record
 	maxrecs       int
 }
 
 func (d *Result) validateFlags() error {
-	if d.Flags&0x8000 != 0x8000 {
+	if d.flags&0x8000 != 0x8000 {
 		return ResponseFlagMissing
 	}
-	if d.Flags&0x7800 != 0x0000 {
+	if d.flags&0x7800 != 0x0000 {
 		return OpcodeNotQuery
 	}
-	if d.Flags&0x0070 != 0x0000 {
+	if d.flags&0x0070 != 0x0000 {
 		return ResponseReservedBitsHigh
 	}
-	switch d.Flags & 0x000f {
+	switch d.flags & 0x000f {
 	case 0:
 		return nil
 	case 1:
@@ -38,12 +38,12 @@ func (d *Result) validateFlags() error {
 
 }
 
-func (d *Result) ReadFrom(r mDNSReader) (err error) {
-	d.TransactionID, err = readUint16(r)
+func (d *Result) readFrom(r mDNSPacketReader) (err error) {
+	d.transactionID, err = readUint16(r)
 	if err != nil {
 		return
 	}
-	d.Flags, err = readUint16(r)
+	d.flags, err = readUint16(r)
 	if err != nil {
 		return
 	}
@@ -80,7 +80,7 @@ func (d *Result) ReadFrom(r mDNSReader) (err error) {
 	for ancount > 0 {
 		ancount--
 		rec := Record{}
-		err = rec.ReadFrom(r)
+		err = rec.readFrom(r)
 		if err != nil {
 			return
 		}
@@ -89,7 +89,7 @@ func (d *Result) ReadFrom(r mDNSReader) (err error) {
 	for nscount > 0 {
 		nscount--
 		rec := Record{}
-		err = rec.ReadFrom(r)
+		err = rec.readFrom(r)
 		if err != nil {
 			return
 		}
@@ -98,7 +98,7 @@ func (d *Result) ReadFrom(r mDNSReader) (err error) {
 	for arcount > 0 {
 		arcount--
 		rec := Record{}
-		err = rec.ReadFrom(r)
+		err = rec.readFrom(r)
 		if err != nil {
 			return
 		}

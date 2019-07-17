@@ -2,13 +2,24 @@ package mdns
 
 import "io"
 
-// defeat go vet whining about method signatures, because it thinks we are trying to
-// implement io.ReaderFrom and io.WriterTo. we aren't (... anymore)
-type mDNSReader interface {
+// Because of message compression (RFC1035 sec 4.1.4) we need to be able to
+// read not just the packet as it arrives, but also random unknown offsets in
+// the DNS packet. Therefore we need io.ReaderAt.
+type mDNSPacketReader interface {
 	io.Reader
 	io.ReaderAt
 }
-type mDNSWriter interface {
+
+// We also have some methods we call "WriteTo", which accepts an io.Writer. As
+// it happens, `go vet` will warn on our non-standard use of a well-known method
+// since we don't bother returning the number of bytes. Calling io.Writer some
+// other name allows us to silence this warning, since it doesn't apply.
+// We only ever use WriteTo to write to a buffer, so that packet in turn can be
+// flushed all at once. If we really felt compelled we could just pass in the
+// buffer instead of a generic Writer. 🤷‍
+// This behavior of `go vet` is kind of frustrating, since interfaces already
+// enforce the method signature contract. Is this solving a real problem?
+type mDNSPacketWriter interface {
 	io.Writer
 }
 
