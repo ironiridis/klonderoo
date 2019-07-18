@@ -25,23 +25,22 @@ func (t RecordType) encode() []byte {
 	return (uint16ToWire(uint16(t)))
 }
 
-func (t RecordType) parser() (ParseableRecord, error) {
+func (t RecordType) parser() ParseableRecord {
 	switch t {
 	case RecordTypeA:
-		return &RecordA{}, nil
+		return &RecordA{}
 	case RecordTypeCNAME:
-		return &RecordCNAME{}, nil
+		return &RecordCNAME{}
 	case RecordTypePTR:
-		return &RecordPTR{}, nil
+		return &RecordPTR{}
 	case RecordTypeTXT:
-		return &RecordTXT{}, nil
+		return &RecordTXT{}
 	case RecordTypeAAAA:
-		return &RecordAAAA{}, nil
+		return &RecordAAAA{}
 	case RecordTypeSRV:
-		return &RecordSRV{}, nil
+		return &RecordSRV{}
 	}
-	return nil, RecordParseTypeUnsupported
-
+	return &RecordUndecoded{}
 }
 
 func (t RecordType) String() string {
@@ -96,6 +95,11 @@ type RecordSRV struct {
 	Weight   uint16
 	Port     uint16
 	Target   Subject
+}
+
+// RecordUndecoded is a container for an unparsed record.
+type RecordUndecoded struct {
+	buf []byte
 }
 
 func (ptr *RecordPTR) String() string {
@@ -183,5 +187,31 @@ func (srv *RecordSRV) parse(r mDNSPacketReader, l uint16) error {
 		return err
 	}
 
+	return nil
+}
+func (und *RecordUndecoded) String() string {
+	return "[unparsed record data]"
+}
+
+// Copy will copy the raw content of the undecoded record into dst
+func (und *RecordUndecoded) Copy(dst []byte) {
+	copy(dst, und.buf)
+	return
+}
+
+// Len will return the length of the undecoded record
+func (und *RecordUndecoded) Len() int {
+	return len(und.buf)
+}
+
+func (und *RecordUndecoded) parse(r mDNSPacketReader, l uint16) error {
+	und.buf = make([]byte, l)
+	n, err := r.Read(und.buf)
+	if err != nil {
+		return err
+	}
+	if n < int(l) {
+		return io.ErrUnexpectedEOF
+	}
 	return nil
 }

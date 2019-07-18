@@ -1,10 +1,5 @@
 package mdns
 
-import (
-	"fmt"
-	"io"
-)
-
 // Record is an individual piece of information such as an IP address.
 type Record struct {
 	Subject *Subject
@@ -50,21 +45,7 @@ func (d *Record) readFrom(r mDNSPacketReader) (err error) {
 	if err != nil {
 		return
 	}
-	d.Value, err = d.Type.parser()
-	if err == nil && d.Value != nil {
-		d.Value.parse(r, d.length)
-	} else {
-		var n int
-		raw := make([]byte, d.length)
-		n, err = r.Read(raw)
-		if err != nil {
-			return
-		}
-		if n != int(d.length) {
-			err = io.ErrUnexpectedEOF
-			return
-		}
-		fmt.Printf("unparsed record %v: %02x\n", d.Type, raw)
-	}
+	d.Value = d.Type.parser()
+	d.Value.parse(r, d.length)
 	return
 }
