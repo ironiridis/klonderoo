@@ -13,7 +13,7 @@ type Client struct {
 	q       *Question
 	addr    *net.UDPAddr
 	conn    *net.UDPConn
-	ifc *net.Interface
+	ifc     *net.Interface
 	timeout time.Duration
 	maxrecs int
 	r       chan<- *Result
