@@ -13,6 +13,7 @@ type Client struct {
 	q       *Question
 	addr    *net.UDPAddr
 	conn    *net.UDPConn
+	ifc *net.Interface
 	timeout time.Duration
 	maxrecs int
 	r       chan<- *Result
@@ -34,7 +35,7 @@ func (c *Client) start() (err error) {
 		return
 	}
 
-	c.conn, err = net.ListenMulticastUDP("udp4", nil, c.addr)
+	c.conn, err = net.ListenMulticastUDP("udp4", c.ifc, c.addr)
 	if err != nil {
 		return
 	}
@@ -79,6 +80,11 @@ func (c *Client) SetTimeout(t time.Duration) {
 // default of 1000
 func (c *Client) SetMaximumRecords(n int) {
 	c.maxrecs = n
+}
+
+// SetInterface changes the network interface this Client will use for mDNS
+func (c *Client) SetInterface(ifc *net.Interface) {
+	c.ifc = ifc
 }
 
 // Run will write the request to the network, and start the thread that awaits

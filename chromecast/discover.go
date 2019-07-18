@@ -17,6 +17,7 @@ type Discoverer struct {
 	devs          knownDevices
 	queryinterval time.Duration
 	expireRate    int
+	ifc           *net.Interface
 }
 
 // DeviceID is an opaque container for a Chromecast UUID.
@@ -82,6 +83,7 @@ func (d *Discoverer) mdnsQuery() {
 	if err != nil {
 		return
 	}
+	c.SetInterface(d.ifc)
 	ch, err := c.Run()
 	if err != nil {
 		return
@@ -169,11 +171,12 @@ func (d *Discoverer) SetExpireRate(m int) error {
 }
 
 // Discover creates a Discoverer and begins listening on the interface specified by ifc
-// (or some OS-dependent one, if nil). "network" must be one of "udp", "udp4", or "udp6".
-func Discover(network string, ifc *net.Interface) (*Discoverer, error) {
+// (or some OS-dependent one, if nil).
+func Discover(ifc *net.Interface) (*Discoverer, error) {
 	d := &Discoverer{
 		Chan:          make(chan *DiscoveryUpdate),
 		stop:          make(chan bool),
+		ifc:           ifc,
 		devs:          knownDevices{},
 		queryinterval: 20 * time.Second,
 		expireRate:    3,
